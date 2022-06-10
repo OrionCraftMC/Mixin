@@ -720,7 +720,9 @@ class MixinInfo implements Comparable<MixinInfo>, IMixinInfo {
                 String remappedName = info.remapClassName((String)target);
                 return remappedName != null ? new DeclaredTarget(remappedName, true) : null;
             } else if (target instanceof Type) {
-                return new DeclaredTarget(((Type)target).getClassName(), false);
+                String originalName = ((Type) target).getClassName();
+                String remappedTypeName = info.remapClassName(originalName);
+                return new DeclaredTarget(remappedTypeName != null ? remappedTypeName : originalName, false);
             }
             return null;
         }
