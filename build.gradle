@@ -14,7 +14,7 @@ buildscript {
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 // Apply plugin
-apply plugin: 'java'
+apply plugin: 'java-library'
 apply plugin: 'com.github.hierynomus.license'
 apply plugin: 'checkstyle'
 apply plugin: 'maven-publish'
@@ -93,12 +93,7 @@ configurations {
 }
 
 sourceSets {
-    legacy {
-        ext.languageVersion = 8
-        ext.compatibility = '1.6'
-    }
     main {
-        compileClasspath += legacy.output
         ext.languageVersion = 8
         ext.compatibility = '1.6'
     }
@@ -181,9 +176,9 @@ dependencies {
     if (Float.parseFloat(asmVersion) < 6) {
         implementation "org.ow2.asm:asm-debug-all:$asmVersion"
     }
-    implementation "org.ow2.asm:asm-tree:$asmVersion"
-    implementation "org.ow2.asm:asm-commons:$asmVersion"
-    implementation "org.ow2.asm:asm-util:$asmVersion"
+    api "org.ow2.asm:asm-tree:$asmVersion"
+    api "org.ow2.asm:asm-commons:$asmVersion"
+    api "org.ow2.asm:asm-util:$asmVersion"
 
     // Annotation Processor
     apImplementation "org.ow2.asm:asm-tree:$asmVersion"
@@ -227,14 +222,11 @@ dependencies {
     bridgeImplementation 'org.apache.logging.log4j:log4j-core:2.0-beta9'
     bridgeImplementation "org.ow2.asm:asm-commons:$legacyForgeAsmVersion"
     
-    legacyImplementation "org.ow2.asm:asm-tree:$asmVersion"
-    
     modularityCompileOnly 'org.apache.logging.log4j:log4j-core:2.11.2'
 }
 
 javadoc {
     exclude '**/throwables'
-    classpath += sourceSets.legacy.output
     source sourceSets.ap.allJava
     options.encoding = 'UTF-8'
     exclude {
