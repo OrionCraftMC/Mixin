@@ -7,7 +7,7 @@ buildscript {
     dependencies {
         classpath 'gradle.plugin.com.hierynomus.gradle.plugins:license-gradle-plugin:0.16.1'
         classpath 'gradle.plugin.com.github.jengelman.gradle.plugins:shadow:7.0.0'
-        classpath 'com.guardsquare:proguard-gradle:' + (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_11) ? '7.2.0' : '7.1.0')
+        classpath 'com.guardsquare:proguard-gradle:' + (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_11) ? '7.2.2' : '7.1.0')
     }
 }
 
@@ -31,11 +31,6 @@ group = 'io.github.orioncraftmc'
 archivesBaseName = 'sponge-mixin'
 version = buildVersion + "+mixin." + upstreamMixinVersion
 
-
-def ENV = System.getenv()
-if (!ENV.CI) {
-    version = version + "-local"
-}
 
 // Extended project information
 ext.projectName = 'Mixin'
@@ -487,13 +482,11 @@ publishing {
     }
 
     repositories {
-        if (ENV.MAVEN_URL) {
+        var lightCraftRepoDir = project.findProperty("lightcraft.repo.location")
+        if (lightCraftRepoDir != null) {
             maven {
-                url ENV.MAVEN_URL
-                credentials {
-                    username ENV.MAVEN_USERNAME
-                    password ENV.MAVEN_PASSWORD
-                }
+                name = "LightCraftRepo"
+                url = new File(lightCraftRepoDir.toString()).toURI()
             }
         }
     }
