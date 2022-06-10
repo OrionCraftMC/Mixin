@@ -28,6 +28,7 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
+import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.asm.mixin.injection.selectors.ElementNode;
 import org.spongepowered.asm.mixin.injection.selectors.ISelectorContext;
 import org.spongepowered.asm.mixin.injection.selectors.ITargetSelector;
@@ -37,6 +38,7 @@ import org.spongepowered.asm.mixin.injection.selectors.ITargetSelectorRemappable
 import org.spongepowered.asm.mixin.injection.selectors.InvalidSelectorException;
 import org.spongepowered.asm.mixin.injection.selectors.MatchResult;
 import org.spongepowered.asm.mixin.throwables.MixinException;
+import org.spongepowered.asm.obfuscation.RemapperChain;
 import org.spongepowered.asm.obfuscation.mapping.IMapping;
 import org.spongepowered.asm.obfuscation.mapping.common.MappingField;
 import org.spongepowered.asm.obfuscation.mapping.common.MappingMethod;
@@ -941,7 +943,26 @@ public final class MemberInfo implements ITargetSelectorRemappable, ITargetSelec
         if (name.isEmpty()) {
             name = null;
         }
-        
+
+        // Last chance to remap the names
+        if (context != null) {
+            RemapperChain remappers = MixinEnvironment.getCurrentEnvironment().getRemappers();
+
+            if (desc != null) desc = remappers.mapDesc(desc);
+            if (name != null) {
+                String newName = remappers
+                        .mapMethodName(owner != null ? owner : context.getMixin().getTargetClassRef(), name, desc);
+
+                newName = remappers
+                        .mapFieldName(owner, newName, desc);
+
+                if (!newName.equals(name)) {
+                    return parse(newName, context);
+                }
+            }
+            if (owner != null) owner = remappers.map(owner);
+        }
+
         return new MemberInfo(name, owner, desc, quantifier, tail, input);
     }
 
